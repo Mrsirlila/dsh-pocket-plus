@@ -19,7 +19,7 @@
 
 </div>
 
-> **dsh-pocket-plus** 是 [shaobeichen/dsh-pocket](https://github.com/shaobeichen/dsh-pocket) 的增强发行版。插件本体仍是那个插件（包名 `dsh-pocket`），我们在它上面打了六处补丁，并配了一个能自动择优三条链路的安卓 App。
+> **dsh-pocket-plus** 是 [shaobeichen/dsh-pocket](https://github.com/shaobeichen/dsh-pocket) 的增强发行版。插件本体仍是那个插件（包名 `dsh-pocket`），我们在它上面打了七处补丁，并配了一个能自动择优三条链路的安卓 App。
 >
 > **English** — An enhanced build of the dsh-pocket plugin for DeepSeek Harness: the access PIN is embedded in the QR code so scanning enters directly, a read-only `/dsh-pocket/entry.json` lets the phone app sync the current public address, and the companion Android app probes LAN / Tailscale / Cloudflare in order and fails over automatically.
 
@@ -75,7 +75,7 @@
 
 ## 和上游的差异
 
-插件侧六处补丁，全部只改行为、不改接口：
+插件侧七处补丁，全部只改行为、不改接口：
 
 | # | 位置 | 改动 | 解决的问题 |
 | --- | --- | --- | --- |
@@ -85,6 +85,7 @@
 | ④ | `lib/proxy.mjs` | 上游 401 时清 `dsh-auth-*` cookie 并 302 重握手 | DSH 重启后手机黑屏 |
 | ⑤ | `client/mobile/mobile.css.ts` | 表格容器可横向滚动、单元格解除最小宽度 | 宽表格右侧被裁 |
 | ⑥ | `lib/service.mjs` 等 | 新增 Tailscale 卡片、`tailscaleUrl`、`tailscaleQr` | 第三条链路的入口 |
+| ⑦ | `client/mobile/mobile.css.ts` | 窄屏强制 `grid-template-columns: 0 minmax(0,1fr) 0` | DSH 0.2.2 窄屏主列宽度为 0、整页黑屏 |
 
 App 侧（`DSH掌上版-1.41.apk`）：
 
@@ -232,7 +233,7 @@ pnpm 从 store 重新链接时会恢复官方文件。用 `start-dsh-web.cmd` �
 上游发版时，不要直接覆盖。按仓库里的 [`开工必读.md`](开工必读.md) 走：
 
 1. 拉上游新版本到临时目录
-2. 逐文件比对，把六处补丁重新打上
+2. 逐文件比对，把七处补丁重新打上
 3. 更新 `plugin/`、重打 zip、更新 `SHA256校验.txt`
 4. 部署用 `robocopy /E /PURGE`（单文件覆盖会写穿 pnpm 硬链接）
 5. 推仓库 → `pnpm update dsh-pocket`
@@ -252,7 +253,7 @@ pnpm 从 store 重新链接时会恢复官方文件。用 `start-dsh-web.cmd` �
 
 ```text
 dsh-pocket-plus/
-├─ plugin/                  # 插件源码（六处补丁已打）
+├─ plugin/                  # 插件源码（七处补丁已打）
 │  ├─ lib/                  # service.mjs / index.js / proxy.mjs / tunnel.mjs
 │  ├─ client/               # 桌面设置页与手机端样式、文案
 │  ├─ 本地修改声明.md        # GPL-2.0 §2(a) 要求的修改声明
@@ -290,7 +291,7 @@ gradle -p D:\android-build\DshPocket assembleRelease --no-daemon
 ## 反馈与贡献
 
 - 上游插件本身的问题，请提到 [shaobeichen/dsh-pocket](https://github.com/shaobeichen/dsh-pocket/issues)。
-- 六处补丁、App 三链路相关的问题，提到 [本仓库 Issues](https://github.com/Mrsirlila/dsh-pocket-plus/issues)。
+- 七处补丁、App 三链路相关的问题，提到 [本仓库 Issues](https://github.com/Mrsirlila/dsh-pocket-plus/issues)。
 - PR 请保持「只做必要改动」：一处补丁一个提交，并在描述里写清验证方式（扫码 / 401 探测 / 表格截图均可）。
 
 ## License
@@ -298,6 +299,8 @@ gradle -p D:\android-build\DshPocket assembleRelease --no-daemon
 GPL-2.0，与上游 dsh-pocket 一致。对上游代码的每一处修改都记录在 [`plugin/本地修改声明.md`](plugin/本地修改声明.md)。
 
 电脑端插件是 [shaobeichen/dsh-pocket](https://github.com/shaobeichen/dsh-pocket)（GPL-2.0）的修改副本，以 **GPL-2.0** 分发，与原作者无关；问题请提到本仓库，不要反馈给上游。界面与图标中的形象版权归其原作者所有。
+
+
 
 
 

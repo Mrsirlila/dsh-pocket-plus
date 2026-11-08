@@ -1,21 +1,13 @@
-DSH 掌上版 1.41 · 文件校验
-============================
+SHA256 校验
 
-SHA-256 (DSH掌上版-1.41.apk):
-51ab34abaf3ac48435f0b98bd5e611f9771de78027d93f2e60f83c70b223472a
+DSH掌上版-1.41.apk
+  602554 字节
+  51AB34ABAF3AC48435F0B98BD5E611F9771DE78027D93F2E60F83C70B223472A
 
-文件大小: 602554 字节
+dsh-pocket插件-已打补丁.zip
+  214819 字节
+  2F562071AC8122A9EE22C098B5A1A166009B97D77FBC061DD46712AA984A4575
 
-SHA-256 (dsh-pocket插件-已打补丁.zip):
-4bc747c1a7a536708d04e11be6d25f3053c8047f9b652fc256b1fe0aa9afd959
-
-文件大小: 213146 字节
-
-
-【怎么用】
-想知道手上的安装包有没有下载损坏或被换过，核对上面这串值：
-
-  Windows 命令提示符：  certutil -hashfile DSH掌上版-1.41.apk SHA256
-  Windows 命令提示符：  certutil -hashfile dsh-pocket插件-已打补丁.zip SHA256
-
-输出的那串字母数字与上面完全一致，就说明文件完好。
+校验方法（PowerShell）：
+  Get-FileHash .\DSH掌上版-1.41.apk -Algorithm SHA256
+  Get-FileHash .\dsh-pocket插件-已打补丁.zip -Algorithm SHA256

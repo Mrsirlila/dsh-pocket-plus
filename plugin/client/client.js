@@ -985,6 +985,20 @@ var MOBILE_CSS = `
     min-height: 32px;
     line-height: 1.45;
   }
+  /* DSH 0.2.2-rc.1 regression: on a phone-sized viewport the shell writes its
+     grid inline as "100vw 0 0" — the drawer's own full width lands in the
+     sidebar column, so the centre column (conversation + composer) collapses
+     to 0px and slides off the right edge, leaving a black page. The sidebar is
+     absolutely positioned at this width, so its column never needs to reserve
+     space; pin it to 0 and hand the rest to the centre column. */
+  @media (max-width: 767px) {
+    [class*="_frame"] {
+      grid-template-columns: 0px minmax(0, 1fr) 0px !important;
+    }
+    [class*="centerCol"] {
+      min-width: 0 !important;
+    }
+  }
 
   [data-phase] [class$="_scroll"]:has(p) {
     padding-left: 20px !important;
