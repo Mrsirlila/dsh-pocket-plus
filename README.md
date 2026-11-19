@@ -75,17 +75,17 @@
 
 ## 和上游的差异
 
-插件侧七处补丁，全部只改行为、不改接口：
+插件侧曾经有七处补丁。其中两处已在 2026-11 随上游 2.13.x 合并，本发行版只保留剩下五处（全部只改行为、不改接口）：
 
 | # | 位置 | 改动 | 解决的问题 |
 | --- | --- | --- | --- |
 | ① | `lib/service.mjs` | 二维码文本追加 `?token=<PIN>` | 扫码直达，不再手输密码 |
 | ② | `lib/index.js` | 新增只读路由 `GET /dsh-pocket/entry.json` | 手机同步当前公网地址与密码 |
 | ③ | `lib/tunnel.mjs` | `spawn` 加 `windowsHide: true` | Windows 上弹黑框、关窗即断隧道 |
-| ④ | `lib/proxy.mjs` | 上游 401 时清 `dsh-auth-*` cookie 并 302 重握手 | DSH 重启后手机黑屏 |
 | ⑤ | `client/mobile/mobile.css.ts` | 表格容器可横向滚动、单元格解除最小宽度 | 宽表格右侧被裁 |
 | ⑥ | `lib/service.mjs` 等 | 新增 Tailscale 卡片、`tailscaleUrl`、`tailscaleQr` | 第三条链路的入口 |
-| ⑦ | `client/mobile/mobile.css.ts` | 窄屏强制 `grid-template-columns: 0 minmax(0,1fr) 0` | DSH 0.2.2 窄屏主列宽度为 0、整页黑屏 |
+
+> 早前的 **④ 401 自愈** 与 **⑦ 窄屏黑屏** 两处，上游 2.13.0 起已自己修好（`hasUsableAuthCookie` + `[data-mobile-nav="frame"]` 列宽修正），本发行版不再覆盖这两个文件。
 
 App 侧（`DSH掌上版-1.41.apk`）：
 
@@ -142,7 +142,7 @@ node "<DSH 安装目录>\lib\bin.js" plugin --profile web add "dsh-pocket@github
 
 ```powershell
 $d="$env:USERPROFILE\.dsh\profiles\web\node_modules\dsh-pocket"
-(Get-Item "$d\lib\service.mjs").Length      # 26509 = 补丁版；22202 = 官方原版
+(Get-Item "$d\lib\service.mjs").Length      # 43542 = 补丁版；39574 = 官方原版
 Select-String -Path "$d\lib\service.mjs" -Pattern 'tailscaleIPv4','qrTextFor' -SimpleMatch
 ```
 
@@ -151,7 +151,7 @@ Select-String -Path "$d\lib\service.mjs" -Pattern 'tailscaleIPv4','qrTextFor' -S
 | 文件 | 大小 | 说明 |
 | --- | --- | --- |
 | [`DSH掌上版-1.41.apk`](DSH掌上版-1.41.apk) | 602554 B | 三链路自动择优、入口锁定、扫码分流、地址同步 |
-| [`dsh-pocket插件-已打补丁.zip`](dsh-pocket插件-已打补丁.zip) | 213146 B | 插件完整源码，可离线部署 |
+| [`dsh-pocket插件-已打补丁.zip`](dsh-pocket插件-已打补丁.zip) | 233521 B | 插件完整源码，可离线部署 |
 
 签名是自签名，首次安装需要允许「安装未知来源」。升级覆盖安装即可，不需要卸载（沿用同一个签名密钥）。
 
@@ -185,7 +185,7 @@ https://xxx.trycloudflare.com/?token=15469936
 (Get-Item "$env:USERPROFILE\.dsh\profiles\web\node_modules\dsh-pocket\lib\service.mjs").Length
 ```
 
-`22202` 是官方原版，`26509` 才是补丁版。用 `robocopy` 重新部署或重启一次 `start-dsh-web.cmd`（自愈脚本会自动补回）。
+`39574` 是官方原版，`43542` 才是补丁版。用 `robocopy` 重新部署或重启一次 `start-dsh-web.cmd`（自愈脚本会自动补回）。
 </details>
 
 <details>
@@ -195,7 +195,7 @@ https://xxx.trycloudflare.com/?token=15469936
 
 原因：DSH 每次启动会换 launch token，而代理发现浏览器带着 `dsh-auth-*` cookie 就不再补 token，旧 cookie 换来 401。
 
-补丁④ 会把这种 401 变成「清掉旧 cookie 并重新握手」的 302，手机自动跳一次就进去了。如果还黑屏，下拉刷新一次，不要清 App 数据。
+2.13.x 起上游代理自己会判断 cookie 有效性并 303 重新握手，手机自动跳一次就进去了。如果还黑屏，下拉刷新一次，不要清 App 数据。
 </details>
 
 <details>
@@ -207,13 +207,13 @@ Quick Tunnel 的域名是临时的，进程一重启就换一个。手机不用�
 <details>
 <summary><b>对话里的表格右边被切掉</b></summary>
 
-补丁⑤ 让表格容器可以横向滑动，并把单元格的最小宽度从 `100px` 解开。如果还是被裁，确认 `client.js` 是 143769 B 的补丁版。
+补丁⑤ 让表格容器可以横向滑动，并把单元格的最小宽度从 `100px` 解开。如果还是被裁，确认 `client.js` 是 167331 B 的补丁版。
 </details>
 
 <details>
 <summary><b>Tailscale 卡片不显示 / 显示但连不上</b></summary>
 
-设置页的卡片依赖 `pocket.status` 里的 `tailscaleUrl`。如果卡片不在，先确认插件是补丁版（`service.mjs` 26509），再确认电脑上 `tailscale status` 能看到本机的 `100.x` 地址。
+设置页的卡片依赖 `pocket.status` 里的 `tailscaleUrl`。如果卡片不在，先确认插件是补丁版（`service.mjs` 43542），再确认电脑上 `tailscale status` 能看到本机的 `100.x` 地址。
 </details>
 
 <details>
@@ -233,7 +233,7 @@ pnpm 从 store 重新链接时会恢复官方文件。用 `start-dsh-web.cmd` �
 上游发版时，不要直接覆盖。按仓库里的 [`开工必读.md`](开工必读.md) 走：
 
 1. 拉上游新版本到临时目录
-2. 逐文件比对，把七处补丁重新打上
+2. 逐文件比对，把五处补丁重新打上
 3. 更新 `plugin/`、重打 zip、更新 `SHA256校验.txt`
 4. 部署用 `robocopy /E /PURGE`（单文件覆盖会写穿 pnpm 硬链接）
 5. 推仓库 → `pnpm update dsh-pocket`
@@ -253,7 +253,7 @@ pnpm 从 store 重新链接时会恢复官方文件。用 `start-dsh-web.cmd` �
 
 ```text
 dsh-pocket-plus/
-├─ plugin/                  # 插件源码（七处补丁已打）
+├─ plugin/                  # 插件源码（五处补丁已打）
 │  ├─ lib/                  # service.mjs / index.js / proxy.mjs / tunnel.mjs
 │  ├─ client/               # 桌面设置页与手机端样式、文案
 │  ├─ 本地修改声明.md        # GPL-2.0 §2(a) 要求的修改声明
@@ -291,7 +291,7 @@ gradle -p D:\android-build\DshPocket assembleRelease --no-daemon
 ## 反馈与贡献
 
 - 上游插件本身的问题，请提到 [shaobeichen/dsh-pocket](https://github.com/shaobeichen/dsh-pocket/issues)。
-- 七处补丁、App 三链路相关的问题，提到 [本仓库 Issues](https://github.com/Mrsirlila/dsh-pocket-plus/issues)。
+- 五处补丁、App 三链路相关的问题，提到 [本仓库 Issues](https://github.com/Mrsirlila/dsh-pocket-plus/issues)。
 - PR 请保持「只做必要改动」：一处补丁一个提交，并在描述里写清验证方式（扫码 / 401 探测 / 表格截图均可）。
 
 ## License

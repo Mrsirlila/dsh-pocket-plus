@@ -238,8 +238,6 @@ function performUpdate(profile, { timeoutMs = 180_000 } = {}) {
       // Windows 上裸 spawn('dsh') 解析到无扩展名 POSIX shim → ENOENT；
       // Node 22+ 直接 spawn .cmd 会 EINVAL（CVE-2024-27980），必须走 shell（PR #54）
       shell: process.platform === 'win32',
-      // Windows：shell 会拉起 cmd.exe（CUI），不隐藏会闪一个控制台窗口
-      windowsHide: true,
     });
     let out = '';
     const onData = (c) => { out += String(c); if (out.length > 4000) out = out.slice(-4000); };
@@ -404,8 +402,8 @@ export function apply(ctx, config = {}, internals = {}) {
   });
   disposers.push(disposeRpc);
 
-  // 手机 App 的入口自动同步：内网时把当前公网地址 + 密码取回手机，出门直接可用
-  // （不用等回到电脑前才扫码——人一旦在外就看不到那个二维码了）。
+  // [本地补丁 ②] 手机 App 的入口自动同步：内网时把当前公网地址 + 密码取回手机，
+  // 出门直接可用（不用等回到电脑前才扫码——人一旦在外就看不到那个二维码了）。
   // 注册在 DSH 自己的 webServer 上，经 3081 代理转发到达；公网入口的请求在代理
   // 那层就要先过密码，所以不会漏给外网。
   // 路径前缀用 dsh-pocket，和 dsh-whale/* 一样不与 DSH 自身路由冲突。
